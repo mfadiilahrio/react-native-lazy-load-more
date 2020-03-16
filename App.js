@@ -2,6 +2,9 @@
 //FlatList Pagination to Load More Data dynamically - Infinite List
 import React, {Component} from 'react';
 //import react in our code.
+import Database from './Database';
+
+const db = new Database();
 
 import {
   View,
@@ -28,6 +31,8 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    this.getUsers();
+
     fetch('https://aboutreact.herokuapp.com/getpost.php?offset=' + this.offset)
       //Sending the currect offset with get request
       .then(response => response.json())
@@ -41,9 +46,29 @@ export default class App extends Component {
           loading: false,
           //updating the loading state to false
         });
+        db.addUsers(responseJson.results);
       })
       .catch(error => {
         console.error(error);
+      });
+  }
+
+  getUsers() {
+    let users = [];
+    db.listUser()
+      .then(data => {
+        users = data;
+        console.log('THIS IS USERS', users);
+        this.setState({
+          users,
+          isLoading: false,
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState = {
+          isLoading: false,
+        };
       });
   }
 
@@ -65,6 +90,7 @@ export default class App extends Component {
             fetching_from_server: false,
             //updating the loading state to false
           });
+          db.addUsers(responseJson.results);
         })
         .catch(error => {
           console.error(error);
@@ -94,9 +120,9 @@ export default class App extends Component {
             renderItem={({item, index}) => (
               <View style={styles.item}>
                 <Text style={styles.text}>
-                  {item.id}
+                  {index}
                   {'.'}
-                  {item.title.toUpperCase()}
+                  {' (' + item.id + ') ' + item.title.toUpperCase()}
                 </Text>
               </View>
             )}
